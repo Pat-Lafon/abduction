@@ -17,9 +17,9 @@
 
 (package
  (name abduction)
- (synopsis "Coverage-type abduction over the CEGIS engine")
+ (synopsis "Coverage-type abduction with a built-in CEGIS engine")
  (description
-  "Infers missing coverage refinements for test input generators by driving the coverage_abduction CEGIS engine against CoverageType subtyping checks.")
+  "Infers missing coverage refinements for test input generators by driving a CEGIS engine (over the zutils proposition language) against CoverageType subtyping checks.")
  (depends
   ocaml
   dune

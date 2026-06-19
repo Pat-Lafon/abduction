@@ -2,13 +2,9 @@ open Language
 open Zutils
 open Sugar
 open Auxtyping
-open Coverage_abduction
-open Feature
 
-type t = Nt.t
-
-let abductive_infer_subtyping_query ~(features : t lit list)
-    ~(verifier : t prop -> bool) ~(sanity_check : t prop -> bool) =
+let abductive_infer_subtyping_query ~(features : Nt.t prop list)
+    ~(verifier : Nt.t prop -> bool) ~(sanity_check : Nt.t prop -> bool) =
   match Cegis.cegis features verifier sanity_check with
   | None -> _failatwith [%here] "end"
   | Some res -> res
@@ -24,13 +20,13 @@ let abductive_infer_cty (rctx : rctx) cty1 cty2 =
   in
   let v = default_v #: cty1.nty in
   let vars = v :: vars in
-  let features = mk_features (Feature.get_template ()) vars in
+  let features = Templates.mk_features (Templates.get_template ()) vars in
   let verifier prop =
     let phi = smart_or [ prop; cty1.phi ] in
     let cty1' = { nty = cty1.nty; phi } in
     let res = sub_cty Under rctx cty1' cty2 in
     let () =
-      Myconfig._log_queries @@ fun _ ->
+      ZUtilsConfig._log_queries @@ fun _ ->
       Pp.printf "@{<bold>@{<orange>Verifier:@} %b@}\n" res
     in
     res
@@ -39,7 +35,7 @@ let abductive_infer_cty (rctx : rctx) cty1 cty2 =
     let cty1' = { nty = cty1.nty; phi } in
     let res = non_emptiness_cty rctx cty1' in
     let () =
-      Myconfig._log_queries @@ fun _ ->
+      ZUtilsConfig._log_queries @@ fun _ ->
       Pp.printf "@{<bold>@{<orange>Sanity_check:@} %b@}\n" res
     in
     res
