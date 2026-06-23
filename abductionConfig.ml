@@ -12,3 +12,8 @@ include ConfigSection.Make (struct
   let name = "abduction"
   let of_yojson = of_yojson
 end)
+
+(* Lower sections must be set first, so chain through [TypecheckerConfig.bootstrap]. *)
+let bootstrap root =
+  TypecheckerConfig.bootstrap root;
+  set (of_meta_config root)
