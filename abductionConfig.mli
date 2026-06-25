@@ -2,7 +2,7 @@ type t = {
   templates_file : string;
   templates : string list;
   name_to_avoid : string list;
-  rlimit : int;
+  rlimit : int option;
 }
 
 (* [set]/[of_meta_config] are deliberately unexposed: [bootstrap] is the sole

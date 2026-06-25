@@ -2,7 +2,7 @@ type t = {
   templates_file : string; (* .ml file of candidate let[@axiom] templates *)
   templates : string list; (* which candidate names to select from that file *) (* TODO: maybe unnneed give that we no longer use templates for recursive arguments?*)
   name_to_avoid : string list; [@default [ "inv"; "mx"; "lo"; "hi" ]]
-  rlimit : int;
+  rlimit : int option; [@default None]
 }
 [@@deriving of_yojson { strict = true }]
 
