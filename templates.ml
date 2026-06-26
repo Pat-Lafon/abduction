@@ -25,20 +25,20 @@ let rec destruct_univerial_prop = function
       ([], p)
   | _ ->
       _failatwith [%here]
-        "abduction template body must be a literal or a conjunction of literals \
-         (e.g. a recognizer guarding an accessor)"
+        "abduction template body must be a literal or a conjunction of \
+         literals (e.g. a recognizer guarding an accessor)"
 
 let prop_to_template prop =
   let fvs = fv_prop prop in
-  let () =
-    if List.length fvs > 0 then _failatwith [%here] "die" else ()
-  in
+  let () = if List.length fvs > 0 then _failatwith [%here] "die" else () in
   let bvars, body = destruct_univerial_prop prop in
   { bvars; body }
 
 let instantiate_template vars { bvars; body } =
   let vars_list =
-    List.map (fun bvar -> List.filter (fun y -> Nt.equal_nt bvar.ty y.ty) vars) bvars
+    List.map
+      (fun bvar -> List.filter (fun y -> Nt.equal_nt bvar.ty y.ty) vars)
+      bvars
   in
   let args_settings = List.choose_list_list vars_list in
   let args_settings = List.map (fun a -> List.combine bvars a) args_settings in
@@ -66,7 +66,7 @@ let mk_features templates vars =
     features
     @ List.filter_map
         (fun x ->
-          if Nt.equal_nt x.ty Nt.bool_ty then Some (Lit ((AVar x) #: Nt.bool_ty))
+          if Nt.equal_nt x.ty Nt.bool_ty then Some (Lit (AVar x)#:Nt.bool_ty)
           else None)
         vars
   in

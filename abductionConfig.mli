@@ -9,5 +9,4 @@ type t = {
    entry point so the zutils + typechecker sections always get set first. See
    abductionConfig.ml. *)
 val bootstrap : Yojson.Safe.t -> unit
-
 val get : unit -> t

@@ -27,8 +27,7 @@ let feature_vec_to_id vec =
 
 let feature_id_to_vec (num_features : int) id =
   let rec aux (n, res) id =
-    if n == num_features then
-      if id == 0 then res else _failatwith [%here] "die"
+    if n == num_features then if id == 0 then res else _failatwith [%here] "die"
     else aux (n + 1, (id mod 2 == 1) :: res) (id / 2)
   in
   aux (0, []) id

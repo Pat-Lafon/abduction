@@ -14,11 +14,11 @@ let abductive_infer_cty (rctx : rctx) cty1 cty2 =
     List.filter_map
       (fun x ->
         match x.ty with
-        | RtyBase { ou = Over; _ } -> Some x.x #: (erase_rty x.ty)
+        | RtyBase { ou = Over; _ } -> Some x.x#:(erase_rty x.ty)
         | _ -> None)
       (Typectx.ctx_to_list rctx.rty_ctx)
   in
-  let v = default_v #: cty1.nty in
+  let v = default_v#:cty1.nty in
   let vars = v :: vars in
   let features = Templates.mk_features (Templates.get_template ()) vars in
   let verifier prop =
@@ -40,7 +40,9 @@ let abductive_infer_cty (rctx : rctx) cty1 cty2 =
     in
     res
   in
-  let phi' = abductive_infer_subtyping_query ~features ~verifier ~sanity_check in
+  let phi' =
+    abductive_infer_subtyping_query ~features ~verifier ~sanity_check
+  in
   { nty = cty2.nty; phi = smart_add_to phi' cty2.phi }
 
 let abductive_infer_rty rctx rty1 rty2 =
