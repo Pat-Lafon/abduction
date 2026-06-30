@@ -13,8 +13,9 @@ let layout_ty = Nt.layout
 (* The abduced coverage type is produced at the single abduction leaf in
    [partial_term_type_infer] and threaded back up as the second component of the
    result. [None] means no leaf fired (a bare-value body needing no abduction). *)
-let rec partial_value_type_infer (uctx : uctx) (a : (t, t value) typed)
-    (rty : t rty) : ((t rty, t rty value) typed * t rty option) option =
+let rec partial_value_type_infer (bctx : built_in_ctx) (rctx : rctx)
+    (a : (t, t value) typed) (rty : t rty) :
+    ((t rty, t rty value) typed * t rty option) option =
   let res =
     match (a.x, rty) with
     | ( VLam { lamarg; body },
@@ -24,8 +25,8 @@ let rec partial_value_type_infer (uctx : uctx) (a : (t, t value) typed)
         in
         let argrty = RtyBase { ou = Over; cty = argcty } in
         let* body, inferred =
-          partial_term_type_infer
-            (add_to_rights uctx [ arg#:argrty ])
+          partial_term_type_infer bctx
+            (Rctx.add_vars rctx [ arg#:argrty ])
             body retty
         in
         let lamarg = arg#:argrty in
@@ -34,8 +35,8 @@ let rec partial_value_type_infer (uctx : uctx) (a : (t, t value) typed)
     | VLam { lamarg; body }, RtyArr { argrty = RtyArr _ as argrty; arg; retty }
       ->
         let* body, inferred =
-          partial_term_type_infer
-            (add_to_rights uctx [ lamarg.x#:argrty ])
+          partial_term_type_infer bctx
+            (Rctx.add_vars rctx [ lamarg.x#:argrty ])
             body retty
         in
         let lamarg = lamarg.x#:argrty in
@@ -95,8 +96,8 @@ let rec partial_value_type_infer (uctx : uctx) (a : (t, t value) typed)
                                                                                 .ty))
               in
               let* body', inferred =
-                partial_term_type_infer
-                  (add_to_rights uctx [ binding; binding1; fixname.x#:rty' ])
+                partial_term_type_infer bctx
+                  (Rctx.add_vars rctx [ binding; binding1; fixname.x#:rty' ])
                   body retty
               in
               let lam =
@@ -141,8 +142,8 @@ let rec partial_value_type_infer (uctx : uctx) (a : (t, t value) typed)
             body#->(subst_term_instance fixarg.x (VVar arg#:fixarg.ty))
           in
           let* body', inferred =
-            partial_term_type_infer
-              (add_to_rights uctx [ binding; fixname.x#:rty' ])
+            partial_term_type_infer bctx
+              (Rctx.add_vars rctx [ binding; fixname.x#:rty' ])
               body retty
           in
           let rty =
@@ -157,22 +158,23 @@ let rec partial_value_type_infer (uctx : uctx) (a : (t, t value) typed)
             ( (VFix { fixname = fixname.x#:rty; fixarg = binding; body = body' })
               #:rty,
               inferred )
-    | _ -> Option.map (fun v -> (v, None)) (value_type_infer uctx a)
+    | _ -> Option.map (fun v -> (v, None)) (value_type_infer bctx rctx a)
   in
   let () =
     match res with
-    | Some (res, _) -> pprint_typing_infer_value_after uctx.rctx (a, Some res)
+    | Some (res, _) -> pprint_typing_infer_value_after rctx (a, Some res)
     | None -> ()
   in
   res
 
-and partial_term_type_infer (uctx : uctx) (a : (t, t term) typed) (rty : t rty)
-    : ((t rty, t rty term) typed * t rty option) option =
+and partial_term_type_infer (bctx : built_in_ctx) (rctx : rctx)
+    (a : (t, t term) typed) (rty : t rty) :
+    ((t rty, t rty term) typed * t rty option) option =
   match a.x with
   | CVal v ->
-      let* v, inferred = partial_value_type_infer uctx v rty in
+      let* v, inferred = partial_value_type_infer bctx rctx v rty in
       Some ((CVal v)#:v.ty, inferred)
   | _ ->
-      let* a = term_type_infer uctx a in
-      let inferred_rty = Infer_prop.abductive_infer_rty uctx.rctx a.ty rty in
+      let* a = term_type_infer bctx rctx a in
+      let inferred_rty = Infer_prop.abductive_infer_rty rctx a.ty rty in
       Some (a, Some inferred_rty)

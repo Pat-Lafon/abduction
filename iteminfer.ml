@@ -40,8 +40,8 @@ let item_infer bctx inv_m imp_m (name, rty) =
   let () = _task_infer_info name rty in
   let time, res =
     clock (fun () ->
-        Termsyn.partial_term_type_infer
-          Termcheck.{ bctx; rctx = Common.Rctx.emp name [] invs }
+        Termsyn.partial_term_type_infer bctx
+          (Common.Rctx.emp name [] invs)
           imp rty)
   in
   let () = Statistic.stat_total_time (name, time) in
